@@ -1,79 +1,51 @@
-#include "range_based.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-/*#define vec_make(cname) vec_t* cname = { .size = 0, .scope = 0 };*/
-#define vec_make(cname)                               \
-    vec_t* cname = (vec_t*)malloc(1 * sizeof(vec_t)); \
-    cname->size = 0;                                  \
-    cname->scope = 50;                                \
-    cname->body = (int*)malloc(50 * sizeof(int));
-
-#define ASSERT(condition, ...)        \
-    if (!(condition)) {               \
-        fprintf(stderr, __VA_ARGS__); \
-        exit(1);                      \
-    }
 
 typedef struct
 {
     size_t size;
     size_t scope;
-    int* body;
+    int* buffer;
 } vec_t;
 
-void vec_push(vec_t* vec, int val)
+vec_t* vec_create(size_t scope)
 {
-    if (vec->size >= vec->scope)
-        vec->body = (int*)realloc(vec->body, (vec->scope += 50) * sizeof(int));
-    vec->body[vec->size++] = val;
+    vec_t* v = (vec_t*)malloc(1 * sizeof(vec_t));
+    v->size = 0;
+    v->scope = scope + 1;
+    v->buffer = (int*)malloc(v->scope * sizeof(int));
+    return v;
 }
 
-void vec_rem(vec_t* vec, size_t index)
+void vec_free(vec_t* v)
 {
-    if (index >= vec->size)
-        return;
-    for (int i = index + 1; i < vec->size; i++)
-        vec->body[i - 1] = vec->body[i];
-    vec->size--;
+    free(v->buffer);
+    free(v);
+    v = NULL;
 }
 
-int vec_get(vec_t* vec, size_t index)
+void vec_push(vec_t* v, int val)
 {
-    ASSERT(index < vec->size, "DIGGA Vec");
-    return vec->body[index];
+    if (v->size >= v->scope)
+        v->buffer = realloc(v->buffer, (v->scope *= 2) * sizeof(int));
+    v->buffer[v->size++] = val;
 }
 
-void vec_destroy(vec_t* vec)
+void vec_rem(vec_t* v, size_t index)
 {
-    free(vec->body);
-    free(vec);
-    vec = NULL;
-}
-
-void print(int d)
-{
-    printf("%d, ", d);
+    v->size--;
+    for (int i = index; i < v->size; i++)
+        v->buffer[i] = v->buffer[i + 1];
 }
 
 int main()
 {
-    vec_make(vec);
-    vec_push(vec, 69);
-
-    for_each(vec->body, vec->size, &print);
-    printf("\n");
-
-    vec_push(vec, 420);
-    for_each(vec->body, vec->size, &print);
-    printf("\n");
-
-    vec_rem(vec, 0);
-    for_each(vec->body, vec->size, &print);
-    printf("\n");
-
-    vec_destroy(vec);
-
+    vec_t* v = vec_create(10);
+    for (int i = 0; i < 100; i++)
+        vec_push(v, i);
+    for (int i = 0; i < 100; i++)
+        printf("%d\n", v->buffer[i]);
+    vec_free(v);
     return 0;
 }
