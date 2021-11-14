@@ -6,7 +6,6 @@
 #include <string.h>
 
 static void for_each(int* arr, size_t arr_size, void (*f)(int));
-
 #endif // RANGE_BASED_H
 
 #ifndef RANGE_BASED_H_IMPLEMENTATION
@@ -17,6 +16,34 @@ static void for_each(int* arr, size_t arr_size, void (*f)(int))
 {
     for (int i = 0; i < arr_size; i++)
         (*f)(arr[i]);
+}
+
+static void reduce(int* arr, size_t arr_size, int (*f)(int, int))
+{
+    for (int i = 0; i < arr_size; i++)
+        arr[0] = (*f)(arr[i], arr[0]);
+}
+
+inline int add(int a, int b)
+{
+    return a + b;
+}
+
+static int sum(int* arr, size_t arr_size)
+{
+    reduce(arr, arr_size, &add);
+    return arr[0];
+}
+
+inline static int mult(int a, int b)
+{
+    return a * b;
+}
+
+static int product(int* arr, size_t arr_size)
+{
+    reduce(arr, arr_size, &mult);
+    return arr[0];
 }
 
 static void for_each_ptr(int* arr, size_t arr_size, void (*f)(int*))
