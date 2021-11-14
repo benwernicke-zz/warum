@@ -31,6 +31,13 @@ static void transform(int* arr, size_t arr_size, int (*f)(int))
         arr[i] = (*f)(arr[i]);
 }
 
+static void transform_if(int* arr, size_t arr_size, bool (*cond)(int), int (*f)(int))
+{
+    for (int i = 0; i < arr_size; i++)
+        if ((*cond)(arr[i]))
+            arr[i] = (*f)(arr[i]);
+}
+
 static void reverse(int* arr, size_t arr_size)
 {
     int temp;
