@@ -1,5 +1,4 @@
 #include "range_based.h"
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -50,30 +49,4 @@ void vec_destroy(vec_t* vec)
     free(vec->body);
     free(vec);
     vec = NULL;
-}
-
-void print(int d)
-{
-    printf("%d, ", d);
-}
-
-int main()
-{
-    vec_make(vec);
-    vec_push(vec, 69);
-
-    for_each(vec->body, vec->size, &print);
-    printf("\n");
-
-    vec_push(vec, 420);
-    for_each(vec->body, vec->size, &print);
-    printf("\n");
-
-    vec_rem(vec, 0);
-    for_each(vec->body, vec->size, &print);
-    printf("\n");
-
-    vec_destroy(vec);
-
-    return 0;
 }
