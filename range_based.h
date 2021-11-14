@@ -12,10 +12,17 @@ static void for_each(int* arr, size_t arr_size, void (*f)(int));
 #ifndef RANGE_BASED_H_IMPLEMENTATION
 #define RANGE_BASED_H_IMPLEMENTATION
 
+// TODO: Variable number of args - for "capture"
 static void for_each(int* arr, size_t arr_size, void (*f)(int))
 {
     for (int i = 0; i < arr_size; i++)
         (*f)(arr[i]);
+}
+
+static void for_each_ptr(int* arr, size_t arr_size, void (*f)(int*))
+{
+    for (int i = 0; i < arr_size; i++)
+        (*f)(&arr[i]);
 }
 
 static void transform(int* arr, size_t arr_size, int (*f)(int))
