@@ -50,8 +50,3 @@ void vec_destroy(vec_t* vec)
     free(vec);
     vec = NULL;
 }
-
-void print(int d)
-{
-    printf("%d, ", d);
-}
