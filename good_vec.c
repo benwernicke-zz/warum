@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef char byte;
 
@@ -13,7 +14,7 @@ typedef struct
 
 byte* get_vec_wrapper(void* vec)
 {
-    return (byte*)(vec - 2 * sizeof(size_t) - 1);
+    return ((byte*)vec - 2 * sizeof(size_t) - 1);
 }
 
 void vec_upsize(void* vec, size_t n_bytes)
@@ -35,23 +36,30 @@ size_t vec_used_bytes(void* vec)
 
 // TODO: make this universal
 //
-#define vec_push(vec_name, val) _vec_push(vec_name, (long)val, sizeof(typeof(*vec_name)));
-/*void _vec_push(void* vec, char val, size_t val_size)*/
+/*#define vec_push(vec_name, val) _vec_push(vec_name, *(unsigned long*)&val, sizeof(typeof(*vec_name)));*/
+/*void vec_push(void* vec, char val)*/
 /*{*/
 /*if (vec_used_bytes(vec) >= vec_allocated_bytes(vec))*/
-/*vec_upsize(vec, vec_allocated_bytes(vec) * 2 + val_size);*/
+/*vec_upsize(vec, vec_allocated_bytes(vec) * 2);*/
 /*((char*)vec)[vec_used_bytes(vec)] = val;*/
 /*((size_t*)get_vec_wrapper(vec))[0]++;*/
 /*}*/
+#define vec_push(vec_name, val)                                    \
+    {                                                              \
+        (vec_name);                                                \
+        (val);                                                     \
+        typeof(*vec_name) tmp_val = val;                           \
+        byte tmp_bytes[sizeof(typeof(*vec_name))];                 \
+        memcpy(tmp_bytes, &tmp_val, sizeof(typeof(*vec_name)));    \
+        _vec_push(vec_name, tmp_bytes, sizeof(typeof(*vec_name))); \
+    }
 
-void _vec_push(void* vec, long val, size_t val_size)
+void _vec_push(void* vec, byte* val, size_t n_bytes)
 {
-    if (vec_used_bytes(vec) >= vec_allocated_bytes(vec))
-        vec_upsize(vec, vec_allocated_bytes(vec) * 2 + val_size);
-
-    // TODO: memcpy(vec, val, val_size)
-    ((char*)vec)[vec_used_bytes(vec)] = val;
-    ((size_t*)get_vec_wrapper(vec))[0]++;
+    if (vec_used_bytes(vec) + n_bytes >= vec_allocated_bytes(vec))
+        vec_upsize(vec, vec_allocated_bytes(vec) * 2 + n_bytes);
+    memcpy(&((byte*)vec)[vec_used_bytes(vec)], val, n_bytes);
+    ((size_t*)get_vec_wrapper(vec))[0] += n_bytes;
 }
 
 void* vec_create()
@@ -69,15 +77,19 @@ void vec_free(void* vec)
 
 int main()
 {
-    char* vec = vec_create();
-    vec_push(vec, 'B');
-    vec_push(vec, 'e');
-    vec_push(vec, 'n');
-    vec_push(vec, '\0');
+    /*char* vec = vec_create();*/
+    /*vec_push(vec, 'B');*/
+    /*vec_push(vec, 'e');*/
+    /*vec_push(vec, 'n');*/
+    /*vec_push(vec, '\0');*/
+    int* vec = vec_create();
+    vec_push(vec, 69);
+    vec_push(vec, 420);
 
     printf("%ld\n", vec_used_bytes(vec));
     printf("%ld\n", vec_allocated_bytes(vec));
-    printf("%s\n", vec);
+    printf("%d, %d\n", vec[0], vec[1]);
+    /*printf("%s\n", vec);*/
 
     vec_free(vec);
     return 0;
