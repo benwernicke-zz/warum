@@ -34,10 +34,22 @@ size_t vec_used_bytes(void* vec)
 }
 
 // TODO: make this universal
-void vec_push(void* vec, char val)
+//
+#define vec_push(vec_name, val) _vec_push(vec_name, (long)val, sizeof(typeof(*vec_name)));
+/*void _vec_push(void* vec, char val, size_t val_size)*/
+/*{*/
+/*if (vec_used_bytes(vec) >= vec_allocated_bytes(vec))*/
+/*vec_upsize(vec, vec_allocated_bytes(vec) * 2 + val_size);*/
+/*((char*)vec)[vec_used_bytes(vec)] = val;*/
+/*((size_t*)get_vec_wrapper(vec))[0]++;*/
+/*}*/
+
+void _vec_push(void* vec, long val, size_t val_size)
 {
     if (vec_used_bytes(vec) >= vec_allocated_bytes(vec))
-        vec_upsize(vec, vec_allocated_bytes(vec) * 2);
+        vec_upsize(vec, vec_allocated_bytes(vec) * 2 + val_size);
+
+    // TODO: memcpy(vec, val, val_size)
     ((char*)vec)[vec_used_bytes(vec)] = val;
     ((size_t*)get_vec_wrapper(vec))[0]++;
 }
