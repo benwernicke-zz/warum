@@ -18,7 +18,6 @@ byte* get_vec_wrapper(void* vec)
 
 void vec_upsize(void* vec, size_t n_bytes)
 {
-    /*byte* vec_wrapper = (byte*)(vec - 2 * sizeof(size_t) - 1);*/
     byte* vec_wrapper = get_vec_wrapper(vec);
     vec_wrapper = (byte*)realloc(vec_wrapper, n_bytes);
     vec = &vec_wrapper[2 * sizeof(size_t) + 1];
@@ -33,6 +32,7 @@ size_t vec_used_bytes(void* vec)
 {
     return ((size_t*)get_vec_wrapper(vec))[0];
 }
+
 // TODO: make this universal
 void vec_push(void* vec, char val)
 {
