@@ -17,16 +17,17 @@ byte* get_vec_wrapper(void* vec)
     return ((byte*)vec - 2 * sizeof(size_t) - 1);
 }
 
+size_t vec_allocated_bytes(void* vec)
+{
+    return ((size_t*)get_vec_wrapper(vec))[1];
+}
+
 void vec_upsize(void* vec, size_t n_bytes)
 {
     byte* vec_wrapper = get_vec_wrapper(vec);
     vec_wrapper = (byte*)realloc(vec_wrapper, n_bytes);
+    ((size_t*)vec_wrapper)[1] = n_bytes;
     vec = &vec_wrapper[2 * sizeof(size_t) + 1];
-}
-
-size_t vec_allocated_bytes(void* vec)
-{
-    return ((size_t*)get_vec_wrapper(vec))[1];
 }
 
 size_t vec_used_bytes(void* vec)
@@ -46,8 +47,6 @@ size_t vec_used_bytes(void* vec)
 /*}*/
 #define vec_push(vec_name, val)                                    \
     {                                                              \
-        (vec_name);                                                \
-        (val);                                                     \
         typeof(*vec_name) tmp_val = val;                           \
         byte tmp_bytes[sizeof(typeof(*vec_name))];                 \
         memcpy(tmp_bytes, &tmp_val, sizeof(typeof(*vec_name)));    \
@@ -83,8 +82,22 @@ int main()
     /*vec_push(vec, 'n');*/
     /*vec_push(vec, '\0');*/
     int* vec = vec_create();
-    vec_push(vec, 69);
-    vec_push(vec, 420);
+    int a = 69;
+    int b = 420;
+
+    union {
+        int a;
+        byte b[sizeof(int)];
+    } i2b;
+    i2b.a = a;
+    _vec_push(vec, i2b.b, sizeof(int));
+    i2b.a = b;
+    _vec_push(vec, i2b.b, sizeof(int));
+    _vec_push(vec, i2b.b, sizeof(int));
+
+    /*vec_push(vec, 69);*/
+    /*vec_push(vec, 420);*/
+    /*vec_push(vec, 420);*/
 
     printf("%ld\n", vec_used_bytes(vec));
     printf("%ld\n", vec_allocated_bytes(vec));
