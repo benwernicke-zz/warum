@@ -21,7 +21,7 @@ inline size_t vec_allocated_bytes(void* vec)
 
 inline size_t vec_used_bytes(void* vec)
 {
-    return ((size_t*)vec_wrapper(vec))[0];
+    return ((size_t*)vec_get_wrapper(vec))[0];
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -29,10 +29,10 @@ inline size_t vec_used_bytes(void* vec)
 
 void vec_double(void* vec)
 {
-    byte* _vec_wrapper = vec_wrapper(vec);
-    _vec_wrapper = (byte*)realloc(_vec_wrapper, vec_allocated_bytes(vec) * 2);
-    ((size_t*)_vec_wrapper)[1] *= 2;
-    vec = &_vec_wrapper[2 * sizeof(size_t) + 1];
+    byte* vec_wrapper = vec_get_wrapper(vec);
+    vec_wrapper = (byte*)realloc(vec_wrapper, vec_allocated_bytes(vec) * 2);
+    ((size_t*)vec_wrapper)[1] *= 2;
+    vec = &vec_wrapper[2 * sizeof(size_t) + 1];
 }
 
 void vec_upsize(void* vec, size_t n_bytes)
@@ -47,15 +47,15 @@ void vec_upsize(void* vec, size_t n_bytes)
 
 void* vec_create()
 {
-    byte* _vec_wrapper = (byte*)malloc(2 * sizeof(size_t) + 2);
-    ((size_t*)_vec_wrapper)[0] = 2 * sizeof(size_t);
-    ((size_t*)_vec_wrapper)[1] = 2 * sizeof(size_t) + 1;
-    return &_vec_wrapper[2 * sizeof(size_t) + 1];
+    byte* vec_wrapper = (byte*)malloc(2 * sizeof(size_t) + 2);
+    ((size_t*)vec_wrapper)[0] = 2 * sizeof(size_t);
+    ((size_t*)vec_wrapper)[1] = 2 * sizeof(size_t) + 1;
+    return &vec_wrapper[2 * sizeof(size_t) + 1];
 }
 
 void vec_free(void* vec)
 {
-    free(vec_wrapper(vec));
+    free(vec_get_wrapper(vec));
 }
 //----------------------------------------------------------------------------------------------------
 // General vec usage
@@ -64,7 +64,7 @@ void _vec_push(void* vec, byte* val, size_t n_bytes)
 {
     vec_upsize(vec, n_bytes);
     memcpy(&((byte*)vec)[vec_used_bytes(vec)], val, n_bytes);
-    ((size_t*)vec_wrapper(vec))[0] += n_bytes;
+    ((size_t*)vec_get_wrapper(vec))[0] += n_bytes;
 }
 
 //----------------------------------------------------------------------------------------------------
