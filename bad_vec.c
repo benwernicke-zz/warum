@@ -1,104 +1,79 @@
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+//------------------------------------------------------------------------------------------------------------------------------------
+// Vec Utils
 typedef char byte;
 
-//----------------------------------------------------------------------------------------------------
-//  Get General Vector Ino
-
-inline byte* vec_get_wrapper(void* vec)
+byte* vec_get_wrapper(void* vec)
 {
-    return ((byte*)vec - 2 * sizeof(size_t) - 1);
+    return ((byte*)vec - 2 * sizeof(size_t));
 }
 
-inline size_t vec_allocated_bytes(void* vec)
-{
-    return ((size_t*)vec_get_wrapper(vec))[1];
-}
-
-inline size_t vec_used_bytes(void* vec)
+size_t vec_size(void* vec)
 {
     return ((size_t*)vec_get_wrapper(vec))[0];
 }
 
-//----------------------------------------------------------------------------------------------------
-// Vector Size Control
-
-void vec_double(void* vec)
+size_t vec_allocated_bytes(void* vec)
 {
-    byte* vec_wrapper = vec_get_wrapper(vec);
-    vec_wrapper = (byte*)realloc(vec_wrapper, vec_allocated_bytes(vec) * 2);
-    ((size_t*)vec_wrapper)[1] *= 2;
-    vec = &vec_wrapper[2 * sizeof(size_t) + 1];
+    return ((size_t*)vec_get_wrapper(vec))[1];
 }
-
-void vec_upsize(void* vec, size_t n_bytes)
-{
-    if (vec_used_bytes(vec) + n_bytes < vec_allocated_bytes(vec))
-        return;
-    vec_double(vec);
-    vec_upsize(vec, n_bytes);
-}
-//----------------------------------------------------------------------------------------------------
-// Vec Constructor Destructor
-
+//------------------------------------------------------------------------------------------------------------------------------------
+// Con- Destructor
 void* vec_create()
 {
-    byte* vec_wrapper = (byte*)malloc(2 * sizeof(size_t) + 2);
-    ((size_t*)vec_wrapper)[0] = 2 * sizeof(size_t);
-    ((size_t*)vec_wrapper)[1] = 2 * sizeof(size_t) + 1;
-    return &vec_wrapper[2 * sizeof(size_t) + 1];
+    byte* vec_wrapper = (byte*)malloc(sizeof(size_t) * 2 + 1);
+    ((size_t*)vec_wrapper)[0] = 0;                      // used bytes;
+    ((size_t*)vec_wrapper)[1] = sizeof(size_t) * 2 + 1; // allocated bytes;
+    return &vec_wrapper[sizeof(size_t) * 2];
 }
 
 void vec_free(void* vec)
 {
     free(vec_get_wrapper(vec));
+    vec = NULL;
 }
-//----------------------------------------------------------------------------------------------------
-// General vec usage
-
-void _vec_push(void* vec, byte* val, size_t n_bytes)
+//------------------------------------------------------------------------------------------------------------------------------------
+// General Usage
+void* vec_wrapper_resize(void* vec, size_t n_bytes)
 {
-    vec_upsize(vec, n_bytes);
-    memcpy(&((byte*)vec)[vec_used_bytes(vec)], val, n_bytes);
-    ((size_t*)vec_get_wrapper(vec))[0] += n_bytes;
+    byte* vec_wrapper = vec_get_wrapper(vec);
+    ((size_t*)vec_wrapper)[1] = n_bytes;
+    vec_wrapper = (byte*)realloc(vec_wrapper, vec_allocated_bytes(vec));
+    return &vec_wrapper[sizeof(size_t) * 2];
 }
 
-//----------------------------------------------------------------------------------------------------
+#define vec_reserve(vec_name, val)                                       \
+    {                                                                    \
+        size_t _n_bytes = sizeof(typeof(*vec_name)) * val;               \
+        vec_wrapper_resize(vec_name, sizeof(size_t) * 2 + 1 + _n_bytes); \
+    };
+
+#define vec_push(vec, val)                                                                  \
+    {                                                                                       \
+        typeof(*vec) _val = val;                                                            \
+        size_t _val_size = sizeof(typeof(*vec));                                            \
+        if (vec_size(vec) * _val_size + 2 * sizeof(size_t) + 1 >= vec_allocated_bytes(vec)) \
+            vec = vec_wrapper_resize(vec, vec_allocated_bytes(vec) * 2 + _val_size);        \
+        vec[vec_size(vec)] = _val;                                                          \
+        ((size_t*)vec_get_wrapper(vec))[0]++;                                               \
+    };
+
+//------------------------------------------------------------------------------------------------------------------------------------
+//
+typedef struct {
+    int a;
+    float b;
+} my_struct_t;
 
 int main()
 {
-    /*char* vec = vec_create();*/
-    /*vec_push(vec, 'B');*/
-    /*vec_push(vec, 'e');*/
-    /*vec_push(vec, 'n');*/
-    /*vec_push(vec, '\0');*/
-    int* vec = vec_create();
-    int a = 69;
-    int b = 420;
-
-    union {
-        int a;
-        byte b[sizeof(int)];
-    } i2b;
-    i2b.a = a;
-    _vec_push(vec, i2b.b, sizeof(int));
-    i2b.a = b;
-    _vec_push(vec, i2b.b, sizeof(int));
-    /*_vec_push(vec, i2b.b, sizeof(int));*/
-
-    /*vec_push(vec, 69);*/
-    /*vec_push(vec, 420);*/
-    /*vec_push(vec, 420);*/
-
-    printf("%ld\n", vec_used_bytes(vec));
-    printf("%ld\n", vec_allocated_bytes(vec));
-    printf("%d, %d\n", vec[0], vec[1]);
-    /*printf("%s\n", vec);*/
-
-    vec_free(vec);
+    double* vec = (double*)vec_create();
+    vec_push(vec, 69.);
+    vec_push(vec, 420.);
+    printf("%lf, %lf\n", vec[0], vec[1]);
     return 0;
 }
