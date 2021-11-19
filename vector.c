@@ -41,11 +41,9 @@ void vec_rem(vec_t* v, size_t index)
 
 int main()
 {
-    vec_t* v = vec_create(10);
-    for (int i = 0; i < 100; i++)
-        vec_push(v, i);
-    for (int i = 0; i < 100; i++)
-        printf("%d\n", v->buffer[i]);
-    vec_free(v);
+    vec_t* vec = vec_create(1);
+    for (int i = 0; i < 1000000; i++)
+        vec_push(vec, i);
+    vec_free(vec);
     return 0;
 }

@@ -26,7 +26,7 @@ size_t vec_allocated_bytes(void* vec)
 void* vec_create()
 {
     byte* vec_wrapper = (byte*)malloc(sizeof(size_t) * 2 + 1);
-    ((size_t*)vec_wrapper)[0] = 0;                      // used bytes;
+    ((size_t*)vec_wrapper)[0] = 0;                      // size
     ((size_t*)vec_wrapper)[1] = sizeof(size_t) * 2 + 1; // allocated bytes;
     return &vec_wrapper[sizeof(size_t) * 2];
 }
@@ -71,9 +71,9 @@ typedef struct {
 
 int main()
 {
-    double* vec = (double*)vec_create();
-    vec_push(vec, 69.);
-    vec_push(vec, 420.);
-    printf("%lf, %lf\n", vec[0], vec[1]);
+    int* vec = (int*)vec_create();
+    for (int i = 0; i < 1000000; i++)
+        vec_push(vec, i);
+    vec_free(vec);
     return 0;
 }
