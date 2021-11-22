@@ -34,8 +34,8 @@ int main()
 {
     /*int a = 34;*/
     int arr[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    compose(fn, 2, &arr_time_two, &sum);
-    calc(fn, 2, arr);
+    compose(fn, 3, &arr_time_two, &arr_time_two, &sum);
+    calc(fn, 3, arr);
     printf("a: %d\n", *arr);
     return 0;
 }
