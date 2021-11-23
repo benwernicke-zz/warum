@@ -6,29 +6,17 @@
     for (int i = 0; i < arr_size; i++)     \
         arr_name[i](var_name);
 
-void add_one(void* a)
-{
-    (*(int*)a)++;
-}
+#define lambda(name, type, param, ...) \
+    void name(void* xx)                \
+    {                                  \
+        type* param = (type*)xx;       \
+        __VA_ARGS__;                   \
+    }
 
-void time_two(void* a)
-{
-    (*(int*)a) *= 2;
-}
-
-void arr_time_two(void* a)
-{
-    for (int i = 0; i < 10; i++)
-        ((int*)a)[i] *= 2;
-}
-
-void sum(void* a)
-{
-    int sum = 0;
-    for (int i = 0; i < 10; i++)
-        sum += ((int*)a)[i];
-    *(int*)a = sum;
-}
+lambda(sum, int, a, int sum = 0; for (int i = 0; i < 10; i++) sum += a[i]; a[0] = sum);
+lambda(add_one, int, a, (*a)++);
+lambda(time_two, int, a, (*a) *= 2);
+lambda(arr_time_two, int, a, for (int i = 0; i < 10; i++) a[i] *= 2);
 
 int main()
 {
