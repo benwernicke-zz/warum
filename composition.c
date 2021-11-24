@@ -13,17 +13,17 @@
         __VA_ARGS__;                   \
     }
 
-lambda(sum, int, a, int sum = 0; for (int i = 0; i < 10; i++) sum += a[i]; a[0] = sum);
-lambda(add_one, int, a, (*a)++);
-lambda(time_two, int, a, (*a) *= 2);
-lambda(arr_time_two, int, a, for (int i = 0; i < 10; i++) a[i] *= 2);
-
 int main()
 {
-    /*int a = 34;*/
-    int arr[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    int nsum = 0;
+    lambda(sum, int, a, for (int i = 0; i < 10; i++) nsum += a[i]);
+    lambda(add_one, int, a, (*a)++);
+    lambda(time_two, int, a, (*a) *= 2);
+    lambda(arr_time_two, int, a, for (int i = 0; i < 10; i++) a[i] *= 2);
+    int arr[]
+        = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     compose(fn, 3, &arr_time_two, &arr_time_two, &sum);
     calc(fn, 3, arr);
-    printf("a: %d\n", *arr);
+    printf("a: %d\n", nsum);
     return 0;
 }
